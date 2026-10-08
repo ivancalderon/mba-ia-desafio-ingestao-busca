@@ -76,12 +76,18 @@ def build_prompt() -> PromptTemplate:
 
 def build_chain(prompt: PromptTemplate, llm: ChatOpenAI) -> Runnable:
     """Compose prompt, model and output parser into a single runnable chain."""
+    if not isinstance(prompt, PromptTemplate):
+        raise TypeError(f"Object of type {prompt.__class__} is not of type PromptTemplate")
+    if not isinstance(llm, Runnable):
+        raise TypeError(f"Object of type {llm.__class__} is not of type Runnable")
     return prompt | llm | StrOutputParser()
 
 
 def retrieve_context(question: str, n_results: int, vector_store: PGVectorStore) -> str:
     """Return the text of the n_results chunks most similar to the question."""
-    similar_documents = vector_store.similarity_search(question, k=n_results)
+    if not isinstance(n_results, int) or n_results <= 0:
+        raise TypeError("n_results should be an int and greater than 0")     
+    similar_documents = vector_store.similarity_search(question, k=int(n_results))
     return "\n".join(document.page_content.strip() for document in similar_documents)
 
 
@@ -92,6 +98,15 @@ def search_prompt(
     chain: Runnable,
 ) -> str:
     """Retrieve context for the question and return the model's answer."""
+    if not isinstance(question, str) or len(question.strip()) == 0:
+        raise ValueError("Question is not valid. Should be of type str and length > 0")
+
+    if not isinstance(vector_store, PGVectorStore):
+        raise TypeError(f"Object of type {vector_store.__class__} is not of type PGVectorStore")
+
+    if not isinstance(chain, Runnable):
+        raise TypeError(f"Object of type {chain.__class__} is not of type Runnable")
+
     context = retrieve_context(
         question=question,
         n_results=n_results,
