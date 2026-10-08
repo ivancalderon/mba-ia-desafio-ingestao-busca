@@ -130,7 +130,39 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 
+Depois, instale as dependências:
+
+```
+pip install -r requirements.txt
+```
+
+## Configuração das variáveis de ambiente
+
+Copie o template e preencha os valores:
+
+```
+cp .env.example .env
+```
+
+| Variável | Descrição | Exemplo |
+| --- | --- | --- |
+| `OPENAI_API_KEY` | Chave da API da OpenAI | `sk-...` |
+| `OPENAI_EMBEDDING_MODEL` | Modelo de embeddings | `text-embedding-3-small` |
+| `OPENAI_CHAT_MODEL` | Modelo de LLM usado para responder | `gpt-4o-mini` |
+| `MODEL_TEMPERATURE` | Temperatura da LLM | `0` |
+| `VECTOR_SIZE` | Dimensão dos vetores de embedding | `768` |
+| `DATABASE_URL` | Conexão com o Postgres (driver `asyncpg`) | `postgresql+asyncpg://postgres:postgres@localhost:5432/rag` |
+| `PG_VECTOR_COLLECTION_NAME` | Nome da tabela de vetores | `documents` |
+| `PDF_PATH` | Caminho do PDF, relativo à raiz do projeto | `document.pdf` |
+| `N_RESULTS` | Quantidade de trechos buscados por pergunta | `10` |
+
+As variáveis `GOOGLE_API_KEY` e `GOOGLE_EMBEDDING_MODEL` do template não são usadas, pois este projeto utiliza a OpenAI.
+
+O valor de `DATABASE_URL` do exemplo corresponde ao usuário, senha, banco e porta definidos no `docker-compose.yml`.
+
 ## Ordem de execução
+
+Execute todos os comandos a partir da raiz do projeto, com o ambiente virtual ativado.
 
 1. Subir o banco de dados:
 
@@ -149,6 +181,14 @@ python src/ingest.py
 ```
 python src/chat.py
 ```
+
+Digite sua pergunta e pressione Enter. Para encerrar, digite `sair` (ou use Ctrl+C / Ctrl+D).
+
+Observações:
+
+- A ingestão pode ser executada mais de uma vez: os trechos têm um id baseado no conteúdo, então são atualizados em vez de duplicados.
+- Se você trocar o modelo de embeddings (e, com isso, o valor de `VECTOR_SIZE`), apague a tabela ou o volume do banco e refaça a ingestão.
+- Se `python src/chat.py` falhar ao iniciar, confirme que o banco está no ar e que a ingestão já foi executada.
 
 ## Entregável
 
